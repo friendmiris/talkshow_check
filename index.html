@@ -1044,116 +1044,114 @@
       const ctx = canvas.getContext("2d");
       ctx.textBaseline = "top";
 
-      // 배경
+      const safeLeft = 88;
+
+      // background
       const backgroundGradient = ctx.createLinearGradient(0, 0, 0, height);
       backgroundGradient.addColorStop(0, "#ff6f32");
       backgroundGradient.addColorStop(1, "#ff5b23");
       ctx.fillStyle = backgroundGradient;
       ctx.fillRect(0, 0, width, height);
 
-      const blueBlob = ctx.createRadialGradient(930, 95, 45, 930, 95, 260);
-      blueBlob.addColorStop(0, "rgba(31,67,216,0.55)");
+      const blueBlob = ctx.createRadialGradient(920, 120, 40, 920, 120, 240);
+      blueBlob.addColorStop(0, "rgba(31,67,216,0.50)");
       blueBlob.addColorStop(1, "rgba(31,67,216,0)");
       ctx.fillStyle = blueBlob;
       ctx.fillRect(0, 0, width, height);
 
-      const limeBlob = ctx.createRadialGradient(35, 105, 8, 35, 105, 145);
-      limeBlob.addColorStop(0, "rgba(231,255,87,0.48)");
+      const limeBlob = ctx.createRadialGradient(26, 110, 8, 26, 110, 160);
+      limeBlob.addColorStop(0, "rgba(231,255,87,0.45)");
       limeBlob.addColorStop(1, "rgba(231,255,87,0)");
       ctx.fillStyle = limeBlob;
       ctx.fillRect(0, 0, width, height);
 
-      // 배경 타이포
+      // subtle background typo
       ctx.fillStyle = "rgba(255,255,255,0.12)";
-      ctx.font = '700 118px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("ALREADY", 72, 188);
-      ctx.fillText("KNOW", 72, 274);
+      ctx.font = '700 112px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("ALREADY", safeLeft, 190);
+      ctx.fillText("KNOW", safeLeft, 278);
 
-      // 상단 스티커
+      // top sticker - larger and farther inside
+      const stickerX = 110;
+      const stickerY = 92;
+      const stickerW = 310;
+      const stickerH = 72;
+
       ctx.fillStyle = "#e7ff57";
-      roundRect(ctx, 118, 92, 230, 56, 28);
+      roundRect(ctx, stickerX, stickerY, stickerW, stickerH, 36);
       ctx.fill();
       ctx.strokeStyle = "#111111";
       ctx.lineWidth = 4;
       ctx.stroke();
 
       ctx.fillStyle = "#111111";
-      ctx.font = '700 24px "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("요즘 나, 솔직히 몇 개?", 140, 108);
+      ctx.font = '700 25px "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("요즘 나, 솔직히 몇 개?", stickerX + 26, stickerY + 20);
 
-      // 제목
+      // title with wider right margin
       ctx.fillStyle = "#ffffff";
-      ctx.font = '700 96px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("내가 그걸", 58, 360);
+      ctx.font = '700 92px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("내가 그걸", safeLeft, 360);
 
       ctx.fillStyle = "#1f43d8";
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 3;
-      ctx.font = '700 94px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.strokeText("모를까?", 58, 462);
-      ctx.fillText("모를까?", 58, 462);
+      ctx.font = '700 88px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.strokeText("모를까?", safeLeft, 454);
+      ctx.fillText("모를까?", safeLeft, 454);
 
+      // hand text
       ctx.fillStyle = "#111111";
       ctx.font = 'italic 700 44px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("I already know", 60, 572);
-      ctx.fillRect(62, 626, 220, 4);
+      ctx.fillText("I already know", safeLeft, 552);
+      ctx.fillRect(safeLeft + 2, 608, 232, 4);
 
-      // 짧은 설명
+      // description above card - keep separated from card
       ctx.fillStyle = "rgba(255,255,255,0.96)";
-      ctx.font = '700 31px "IBM Plex Sans KR", sans-serif';
-      drawWrappedText(
-        ctx,
-        "모르는 게 아니라, 알면서도 반복하는 순간들. 가볍게 체크하고 지금의 나를 한 번 들여다보세요.",
-        60,
-        680,
-        850,
-        44
-      );
+      ctx.font = '700 28px "IBM Plex Sans KR", sans-serif';
+      const introText = "모르는 게 아니라, 알면서도 반복하는 순간들. 가볍게 체크하고 지금의 나를 한 번 들여다보세요.";
+      const introLines = wrapTextLines(ctx, introText, 820).slice(0, 3);
+      introLines.forEach((line, index) => {
+        ctx.fillText(line, safeLeft, 660 + index * 40);
+      });
 
-      // 결과 카드: 모든 결과 문구가 파란 네모 안에 들어가도록 높이 확보
-      const cardX = 72;
-      const cardY = 744;
-      const cardW = 936;
-      const cardH = 300;
+      // result card lower with generous gap
+      const cardX = 90;
+      const cardY = 800;
+      const cardW = 900;
+      const cardH = 220;
 
       ctx.fillStyle = "#1f43d8";
-      roundRect(ctx, cardX, cardY, cardW, cardH, 38);
+      roundRect(ctx, cardX, cardY, cardW, cardH, 34);
       ctx.fill();
 
-      // 장식 원은 카드 안쪽 아래에만 위치
+      // orange decoration fully inside card
       ctx.fillStyle = "#ff6123";
       ctx.beginPath();
-      ctx.arc(cardX + cardW - 55, cardY + cardH - 45, 100, 0, Math.PI * 2);
+      ctx.arc(cardX + cardW - 20, cardY + cardH - 18, 92, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = "rgba(255,255,255,0.50)";
-      ctx.font = '700 21px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("RESULT", cardX + cardW - 125, cardY + 24);
-
-      ctx.fillStyle = "rgba(255,255,255,0.72)";
-      ctx.font = '700 21px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("MY CHECK SCORE", cardX + 34, cardY + 28);
+      ctx.fillStyle = "rgba(255,255,255,0.52)";
+      ctx.font = '700 20px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("MY CHECK SCORE", cardX + 28, cardY + 22);
+      ctx.fillText("RESULT", cardX + cardW - 122, cardY + 22);
 
       ctx.fillStyle = "#ffffff";
-      ctx.font = '700 60px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText(`${score}/13`, cardX + 34, cardY + 56);
+      ctx.font = '700 58px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText(`${score}/13`, cardX + 28, cardY + 50);
 
-      // 제목은 최대 2줄
-      ctx.font = '700 36px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      const titleLines = wrapTextLines(ctx, result.title, 700).slice(0, 2);
+      ctx.font = '700 34px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      const titleLines = wrapTextLines(ctx, result.title, 610).slice(0, 2);
       titleLines.forEach((line, index) => {
-        ctx.fillText(line, cardX + 34, cardY + 126 + index * 46);
+        ctx.fillText(line, cardX + 28, cardY + 114 + index * 40);
       });
 
-      // 설명도 카드 안쪽에 최대 2줄로 정리
       ctx.fillStyle = "rgba(255,255,255,0.84)";
-      ctx.font = '600 23px "IBM Plex Sans KR", sans-serif';
-      const descLines = wrapTextLines(ctx, result.description, 720).slice(0, 2);
+      ctx.font = '600 22px "IBM Plex Sans KR", sans-serif';
+      const descLines = wrapTextLines(ctx, result.description, 640).slice(0, 2);
       descLines.forEach((line, index) => {
-        ctx.fillText(line, cardX + 34, cardY + 226 + index * 34);
+        ctx.fillText(line, cardX + 28, cardY + 176 + index * 28);
       });
-
-      // URL 텍스트는 이미지에 표시하지 않음
 
       const blob = await new Promise((resolve) => {
         canvas.toBlob(resolve, "image/png");
