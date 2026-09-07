@@ -731,6 +731,16 @@
       *{scroll-behavior:auto!important; transition:none!important; animation:none!important}
     }
   </style>
+
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.8.3/kakao.min.js" crossorigin="anonymous"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      if (window.Kakao && !Kakao.isInitialized()) {
+        Kakao.init("b53d20bac8d563bc32d61e7cf469e505");
+      }
+    });
+  </script>
+
 </head>
 
 <body>
@@ -1174,24 +1184,102 @@ ${location.href}`;
       setTimeout(() => URL.revokeObjectURL(objectUrl), 1200);
     }
 
+
+    async function shareResultToKakao(score, result, shareFile) {
+      if (!window.Kakao || !Kakao.isInitialized()) {
+        throw new Error("Kakao SDK가 초기화되지 않았습니다.");
+      }
+
+      const pageUrl = `${location.origin}${location.pathname}`;
+      let imageUrl = "";
+
+      if (shareFile) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(shareFile);
+
+        const uploadResponse = await Kakao.Share.uploadImage({
+          file: dataTransfer.files
+        });
+
+        imageUrl = uploadResponse?.infos?.original?.url || "";
+      }
+
+      if (imageUrl) {
+        Kakao.Share.sendDefault({
+          objectType: "feed",
+          content: {
+            title: `내가 그걸 모를까? · ${score}/13`,
+            description: result.title,
+            imageUrl,
+            imageWidth: 1080,
+            imageHeight: 1350,
+            link: {
+              mobileWebUrl: pageUrl,
+              webUrl: pageUrl
+            }
+          },
+          buttons: [
+            {
+              title: "나도 체크해보기",
+              link: {
+                mobileWebUrl: pageUrl,
+                webUrl: pageUrl
+              }
+            }
+          ]
+        });
+        return;
+      }
+
+      Kakao.Share.sendDefault({
+        objectType: "text",
+        text: `내가 그걸 모를까? 셀프 체크 결과 ${score}/13\n${result.title}`,
+        link: {
+          mobileWebUrl: pageUrl,
+          webUrl: pageUrl
+        },
+        buttonTitle: "나도 체크해보기"
+      });
+    }
+
     document.getElementById("shareButton").addEventListener("click", async () => {
+      const shareButton = document.getElementById("shareButton");
+      const originalLabel = shareButton.textContent;
+
       const score = Number(scoreValue.textContent);
       const result = getResult(score);
       const shareText = `내가 그걸 모를까? 셀프 체크 결과 ${score}/13
 ${result.title}`;
-      const shareData = {
-        title: "내가 그걸 모를까?",
-        text: shareText,
-        url: location.href
-      };
+
+      shareButton.disabled = true;
+      shareButton.textContent = "카카오톡 여는 중...";
 
       let shareFile = null;
 
       try {
         shareFile = await createResultShareFile(score, result);
-      } catch (error) {}
+      } catch (error) {
+        console.warn("결과 이미지 생성 실패:", error);
+      }
 
+      try {
+        await shareResultToKakao(score, result, shareFile);
+        return;
+      } catch (kakaoError) {
+        console.warn("카카오톡 공유 실패:", kakaoError);
+      } finally {
+        shareButton.disabled = false;
+        shareButton.textContent = originalLabel;
+      }
+
+      // 카카오 SDK 공유가 실패한 경우에만 기존 공유 기능으로 대체합니다.
       if (navigator.share) {
+        const shareData = {
+          title: "내가 그걸 모를까?",
+          text: shareText,
+          url: location.href
+        };
+
         if (shareFile && navigator.canShare && navigator.canShare({ files: [shareFile] })) {
           try {
             await navigator.share({
@@ -1214,16 +1302,10 @@ ${result.title}`;
 
       const copied = await copyShareTextFallback(shareText);
 
-      if (shareFile) {
-        await downloadShareImage(shareFile);
-      }
-
       if (copied) {
-        alert("PC에서는 결과 이미지 파일을 다운로드하고, 결과 문구와 링크를 복사했어요. 카카오톡이나 메신저에 이미지와 링크를 함께 붙여넣어 공유하면 됩니다.");
-      } else if (shareFile) {
-        alert("PC에서는 결과 이미지 파일을 다운로드했어요. 카카오톡이나 메신저에 이미지와 현재 페이지 링크를 함께 첨부해서 공유해 주세요.");
+        alert("카카오톡 공유창을 열지 못해 결과 문구와 링크를 복사했어요.");
       } else {
-        alert("이 브라우저에서는 자동 공유가 제한돼요. 링크를 직접 복사해서 공유해 주세요.");
+        alert("카카오톡 공유창을 열지 못했어요. 카카오 Developers의 도메인 설정을 확인해 주세요.");
       }
     });
 
