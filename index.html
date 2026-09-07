@@ -1066,37 +1066,37 @@
       // 배경 타이포
       ctx.fillStyle = "rgba(255,255,255,0.12)";
       ctx.font = '700 118px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("ALREADY", 56, 146);
-      ctx.fillText("KNOW", 56, 232);
+      ctx.fillText("ALREADY", 72, 188);
+      ctx.fillText("KNOW", 72, 274);
 
       // 상단 스티커
       ctx.fillStyle = "#e7ff57";
-      roundRect(ctx, 74, 62, 252, 60, 30);
+      roundRect(ctx, 118, 92, 230, 56, 28);
       ctx.fill();
       ctx.strokeStyle = "#111111";
       ctx.lineWidth = 4;
       ctx.stroke();
 
       ctx.fillStyle = "#111111";
-      ctx.font = '700 27px "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("요즘 나, 솔직히 몇 개?", 100, 78);
+      ctx.font = '700 24px "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("요즘 나, 솔직히 몇 개?", 140, 108);
 
       // 제목
       ctx.fillStyle = "#ffffff";
       ctx.font = '700 104px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("내가 그걸", 56, 308);
+      ctx.fillText("내가 그걸", 72, 348);
 
       ctx.fillStyle = "#1f43d8";
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 3;
       ctx.font = '700 102px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.strokeText("모를까?", 56, 412);
-      ctx.fillText("모를까?", 56, 412);
+      ctx.strokeText("모를까?", 72, 452);
+      ctx.fillText("모를까?", 72, 452);
 
       ctx.fillStyle = "#111111";
       ctx.font = 'italic 700 44px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("I already know", 58, 524);
-      ctx.fillRect(60, 578, 232, 4);
+      ctx.fillText("I already know", 74, 564);
+      ctx.fillRect(76, 618, 220, 4);
 
       // 짧은 설명
       ctx.fillStyle = "rgba(255,255,255,0.96)";
@@ -1104,16 +1104,16 @@
       drawWrappedText(
         ctx,
         "모르는 게 아니라, 알면서도 반복하는 순간들. 가볍게 체크하고 지금의 나를 한 번 들여다보세요.",
-        58,
-        628,
-        900,
-        46
+        74,
+        666,
+        860,
+        44
       );
 
       // 결과 카드: 모든 결과 문구가 파란 네모 안에 들어가도록 높이 확보
-      const cardX = 56;
-      const cardY = 730;
-      const cardW = 968;
+      const cardX = 72;
+      const cardY = 744;
+      const cardW = 936;
       const cardH = 300;
 
       ctx.fillStyle = "#1f43d8";
