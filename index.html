@@ -553,6 +553,45 @@
       transition:width .28s cubic-bezier(.2,.8,.2,1);
     }
 
+
+    .finishButton{
+      width:100%;
+      margin-top:14px;
+      border:none;
+      border-radius:16px;
+      padding:15px 14px;
+      background:var(--lime);
+      color:#111;
+      font-size:16px;
+      font-weight:950;
+      cursor:pointer;
+      transition:transform .15s ease;
+    }
+
+    .finishButton:active{
+      transform:scale(.985);
+    }
+
+    .hiddenResult{
+      display:none;
+    }
+
+    .hiddenResult.show{
+      display:block;
+      animation:resultReveal .42s cubic-bezier(.2,.8,.2,1);
+    }
+
+    @keyframes resultReveal{
+      from{
+        opacity:0;
+        transform:translateY(18px) scale(.985);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+      }
+    }
+
     .resultBlock{padding:28px 20px 8px}
 
     .resultCard{
@@ -779,9 +818,13 @@
           <div class="progressTrack">
             <div class="progressBar" id="progressBar"></div>
           </div>
+
+          <button class="finishButton" id="finishButton" type="button">
+            다 체크했어요 →
+          </button>
         </div>
 
-        <div class="resultBlock">
+        <div class="resultBlock hiddenResult" id="resultBlock">
           <div class="resultCard">
             <h3 class="resultTitle" id="resultTitle">아직 체크 안 했네. 지금 기분대로 툭툭 눌러봐.</h3>
             <p class="resultDesc" id="resultDescription">
@@ -876,12 +919,8 @@
       });
 
       const score = checkboxes.filter((checkbox) => checkbox.checked).length;
-      const result = getResult(score);
-
       scoreValue.textContent = score;
       progressBar.style.width = `${score / questions.length * 100}%`;
-      resultTitle.textContent = result.title;
-      resultDescription.textContent = result.description;
 
       if (navigator.vibrate) {
         navigator.vibrate(12);
@@ -892,37 +931,299 @@
       document.getElementById("checkSection").scrollIntoView({behavior:"smooth", block:"start"});
     });
 
+
+    document.getElementById("finishButton").addEventListener("click", () => {
+      const score = [...document.querySelectorAll(".questionCheckbox")]
+        .filter((checkbox) => checkbox.checked).length;
+
+      const result = getResult(score);
+
+      resultTitle.textContent = result.title;
+      resultDescription.textContent = result.description;
+
+      const resultBlock = document.getElementById("resultBlock");
+      resultBlock.classList.add("show");
+
+      resultBlock.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+
     document.getElementById("resetButton").addEventListener("click", () => {
       document.querySelectorAll(".questionCheckbox").forEach((checkbox) => {
         checkbox.checked = false;
       });
       updateScore();
+
+      const resultBlock = document.getElementById("resultBlock");
+      resultBlock.classList.remove("show");
+
       document.querySelector(".sheetHead").scrollIntoView({behavior:"smooth", block:"start"});
     });
+
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + width, y, x + width, y + height, r);
+      ctx.arcTo(x + width, y + height, x, y + height, r);
+      ctx.arcTo(x, y + height, x, y, r);
+      ctx.arcTo(x, y, x + width, y, r);
+      ctx.closePath();
+    }
+
+    function wrapTextLines(ctx, text, maxWidth) {
+      const words = text.split(" ");
+      const lines = [];
+      let currentLine = "";
+
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        if (ctx.measureText(testLine).width <= maxWidth) {
+          currentLine = testLine;
+          continue;
+        }
+
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+          continue;
+        }
+
+        let charLine = "";
+        for (const char of word) {
+          const testCharLine = charLine + char;
+          if (ctx.measureText(testCharLine).width <= maxWidth) {
+            charLine = testCharLine;
+          } else {
+            if (charLine) lines.push(charLine);
+            charLine = char;
+          }
+        }
+        currentLine = charLine;
+      }
+
+      if (currentLine) lines.push(currentLine);
+      return lines;
+    }
+
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+      const lines = wrapTextLines(ctx, text, maxWidth);
+      lines.forEach((line, index) => {
+        ctx.fillText(line, x, y + index * lineHeight);
+      });
+      return lines.length;
+    }
+
+    async function createResultShareFile(score, result) {
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (error) {}
+      }
+
+      const canvas = document.createElement("canvas");
+      const width = 1080;
+      const height = 1350;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.textBaseline = "top";
+
+      const backgroundGradient = ctx.createLinearGradient(0, 0, 0, height);
+      backgroundGradient.addColorStop(0, "#ff6f32");
+      backgroundGradient.addColorStop(1, "#ff5b23");
+      ctx.fillStyle = backgroundGradient;
+      ctx.fillRect(0, 0, width, height);
+
+      const blueBlob = ctx.createRadialGradient(930, 120, 60, 930, 120, 290);
+      blueBlob.addColorStop(0, "rgba(31,67,216,0.55)");
+      blueBlob.addColorStop(1, "rgba(31,67,216,0)");
+      ctx.fillStyle = blueBlob;
+      ctx.fillRect(0, 0, width, height);
+
+      const limeBlob = ctx.createRadialGradient(40, 140, 10, 40, 140, 170);
+      limeBlob.addColorStop(0, "rgba(231,255,87,0.50)");
+      limeBlob.addColorStop(1, "rgba(231,255,87,0)");
+      ctx.fillStyle = limeBlob;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.font = '700 132px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("ALREADY", 58, 156);
+      ctx.fillText("KNOW", 58, 258);
+
+      ctx.fillStyle = "#e7ff57";
+      roundRect(ctx, 58, 48, 252, 64, 32);
+      ctx.fill();
+      ctx.strokeStyle = "#111111";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.fillStyle = "#111111";
+      ctx.font = '700 28px "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("요즘 나, 솔직히 몇 개?", 84, 66);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = '700 118px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("내가 그걸", 58, 336);
+
+      ctx.fillStyle = "#1f43d8";
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 3;
+      ctx.font = '700 116px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.strokeText("모를까?", 58, 452);
+      ctx.fillText("모를까?", 58, 452);
+
+      ctx.fillStyle = "#111111";
+      ctx.font = 'italic 700 52px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("I already know", 58, 588);
+      ctx.fillRect(62, 646, 260, 4);
+
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      ctx.font = '700 36px "IBM Plex Sans KR", sans-serif';
+      drawWrappedText(
+        ctx,
+        "모르는 게 아니라, 알면서도 반복하는 순간들. 가볍게 체크하고 지금의 나를 한 번 들여다보세요.",
+        58,
+        726,
+        820,
+        56
+      );
+
+      ctx.fillStyle = "#1f43d8";
+      roundRect(ctx, 58, 860, 964, 378, 42);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.font = '700 24px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("RESULT", 890, 892);
+
+      ctx.fillStyle = "#ff6123";
+      ctx.beginPath();
+      ctx.arc(966, 1178, 122, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,0.72)";
+      ctx.font = '700 24px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText("MY CHECK SCORE", 92, 904);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = '700 74px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText(`${score}/13`, 92, 944);
+
+      ctx.font = '700 48px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      const titleLineCount = drawWrappedText(ctx, result.title, 92, 1040, 720, 66);
+
+      ctx.fillStyle = "rgba(255,255,255,0.82)";
+      ctx.font = '600 28px "IBM Plex Sans KR", sans-serif';
+      drawWrappedText(ctx, result.description, 92, 1040 + titleLineCount * 66 + 24, 720, 46);
+
+      ctx.fillStyle = "rgba(255,255,255,0.78)";
+      ctx.font = '600 24px "IBM Plex Sans KR", sans-serif';
+      ctx.fillText(location.href, 58, 1274);
+
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/png");
+      });
+
+      return new File([blob], `내가그걸모를까-결과-${score}.png`, { type: "image/png" });
+    }
+
+    async function copyShareTextFallback(shareText) {
+      const fullText = `${shareText}
+${location.href}`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(fullText);
+          return true;
+        } catch (error) {}
+      }
+
+      const textArea = document.createElement("textarea");
+      textArea.value = fullText;
+      textArea.setAttribute("readonly", "");
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      let copied = false;
+      try {
+        copied = document.execCommand("copy");
+      } catch (error) {}
+
+      document.body.removeChild(textArea);
+      return copied;
+    }
+
+    async function downloadShareImage(file) {
+      const objectUrl = URL.createObjectURL(file);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1200);
+    }
 
     document.getElementById("shareButton").addEventListener("click", async () => {
       const score = Number(scoreValue.textContent);
       const result = getResult(score);
       const shareText = `내가 그걸 모를까? 셀프 체크 결과 ${score}/13
 ${result.title}`;
+      const shareData = {
+        title: "내가 그걸 모를까?",
+        text: shareText,
+        url: location.href
+      };
 
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title:"내가 그걸 모를까?",
-            text:shareText,
-            url:location.href
-          });
-        } catch {}
-        return;
-      }
+      let shareFile = null;
 
       try {
-        await navigator.clipboard.writeText(`${shareText}
-${location.href}`);
-        alert("결과 문구와 현재 페이지 링크를 복사했어요! 원하는 곳에 붙여넣으면 됩니다.");
-      } catch {
-        alert("이 브라우저에서는 자동 복사가 지원되지 않아요.");
+        shareFile = await createResultShareFile(score, result);
+      } catch (error) {}
+
+      if (navigator.share) {
+        if (shareFile && navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+          try {
+            await navigator.share({
+              ...shareData,
+              files: [shareFile]
+            });
+            return;
+          } catch (error) {
+            if (error && error.name === "AbortError") return;
+          }
+        }
+
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (error) {
+          if (error && error.name === "AbortError") return;
+        }
+      }
+
+      const copied = await copyShareTextFallback(shareText);
+
+      if (shareFile) {
+        await downloadShareImage(shareFile);
+      }
+
+      if (copied) {
+        alert("PC에서는 결과 이미지 파일을 다운로드하고, 결과 문구와 링크를 복사했어요. 카카오톡이나 메신저에 이미지와 링크를 함께 붙여넣어 공유하면 됩니다.");
+      } else if (shareFile) {
+        alert("PC에서는 결과 이미지 파일을 다운로드했어요. 카카오톡이나 메신저에 이미지와 현재 페이지 링크를 함께 첨부해서 공유해 주세요.");
+      } else {
+        alert("이 브라우저에서는 자동 공유가 제한돼요. 링크를 직접 복사해서 공유해 주세요.");
       }
     });
 
