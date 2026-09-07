@@ -1045,9 +1045,7 @@
       ctx.textBaseline = "top";
 
       const safeLeft = 92;
-      const safeRight = 92;
 
-      // background
       const backgroundGradient = ctx.createLinearGradient(0, 0, 0, height);
       backgroundGradient.addColorStop(0, "#ff6f32");
       backgroundGradient.addColorStop(1, "#ff5b23");
@@ -1066,13 +1064,11 @@
       ctx.fillStyle = limeBlob;
       ctx.fillRect(0, 0, width, height);
 
-      // subtle background typo
       ctx.fillStyle = "rgba(255,255,255,0.12)";
       ctx.font = '700 108px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText("ALREADY", safeLeft, 192);
+      ctx.fillText("ALREADY", safeLeft, 190);
       ctx.fillText("KNOW", safeLeft, 276);
 
-      // top sticker
       const stickerX = 118;
       const stickerY = 96;
       const stickerW = 320;
@@ -1089,7 +1085,6 @@
       ctx.font = '700 25px "IBM Plex Sans KR", sans-serif';
       ctx.fillText("요즘 나, 솔직히 몇 개?", stickerX + 24, stickerY + 20);
 
-      // title
       ctx.fillStyle = "#ffffff";
       ctx.font = '700 90px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
       ctx.fillText("내가 그걸", safeLeft, 360);
@@ -1101,57 +1096,54 @@
       ctx.strokeText("모를까?", safeLeft, 452);
       ctx.fillText("모를까?", safeLeft, 452);
 
-      // hand text
       ctx.fillStyle = "#111111";
       ctx.font = 'italic 700 42px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
       ctx.fillText("I already know", safeLeft, 548);
       ctx.fillRect(safeLeft + 2, 604, 224, 4);
 
-      // intro copy - keep short so it does not collide with result card
       ctx.fillStyle = "rgba(255,255,255,0.96)";
       ctx.font = '700 26px "IBM Plex Sans KR", sans-serif';
       const introText = "모르는 게 아니라, 알면서도 반복하는 순간들. 가볍게 체크하고 지금의 나를 한 번 들여다보세요.";
-      const introLines = wrapTextLines(ctx, introText, 800).slice(0, 2);
+      const introLines = wrapTextLines(ctx, introText, 820).slice(0, 2);
       introLines.forEach((line, index) => {
         ctx.fillText(line, safeLeft, 652 + index * 38);
       });
 
-      // result card - much more inset so Kakao preview never clips it
-      const cardX = 118;
-      const cardY = 792;
-      const cardW = 844;
-      const cardH = 188;
+      // 충분한 안전 여백 + 설명문 2줄 전체 표시
+      const cardX = 126;
+      const cardY = 774;
+      const cardW = 828;
+      const cardH = 230;
 
       ctx.fillStyle = "#1f43d8";
       roundRect(ctx, cardX, cardY, cardW, cardH, 30);
       ctx.fill();
 
-      // orange decoration fully inside the card
       ctx.fillStyle = "#ff6123";
       ctx.beginPath();
-      ctx.arc(cardX + cardW - 16, cardY + cardH - 10, 80, 0, Math.PI * 2);
+      ctx.arc(cardX + cardW - 10, cardY + cardH - 8, 76, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = "rgba(255,255,255,0.52)";
       ctx.font = '700 18px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
       ctx.fillText("MY CHECK SCORE", cardX + 24, cardY + 18);
-      ctx.fillText("RESULT", cardX + cardW - 102, cardY + 18);
+      ctx.fillText("RESULT", cardX + cardW - 100, cardY + 18);
 
       ctx.fillStyle = "#ffffff";
-      ctx.font = '700 54px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
-      ctx.fillText(`${score}/13`, cardX + 24, cardY + 44);
+      ctx.font = '700 52px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.fillText(`${score}/13`, cardX + 24, cardY + 42);
 
-      ctx.font = '700 31px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+      ctx.font = '700 30px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
       const titleLines = wrapTextLines(ctx, result.title, 560).slice(0, 2);
       titleLines.forEach((line, index) => {
-        ctx.fillText(line, cardX + 24, cardY + 100 + index * 36);
+        ctx.fillText(line, cardX + 24, cardY + 98 + index * 34);
       });
 
       ctx.fillStyle = "rgba(255,255,255,0.84)";
       ctx.font = '600 20px "IBM Plex Sans KR", sans-serif';
-      const descLines = wrapTextLines(ctx, result.description, 600).slice(0, 1);
+      const descLines = wrapTextLines(ctx, result.description, 600).slice(0, 2);
       descLines.forEach((line, index) => {
-        ctx.fillText(line, cardX + 24, cardY + 150 + index * 24);
+        ctx.fillText(line, cardX + 24, cardY + 168 + index * 28);
       });
 
       const blob = await new Promise((resolve) => {
